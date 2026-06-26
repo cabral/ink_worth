@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title | default: site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+  {% feed_meta %}
+  {% seo %}
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --paper:  #f2eee4;
+      --ink:    #23201a;
+      --rule:   #ddd6c8;
+      --muted:  #8a8170;
+      --accent: #28384a;
+      --brand:  #1f9b94;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Newsreader', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 88px 40px 132px;
+      display: flex;
+      justify-content: center;
+    }
+
+    article {
+      width: 100%;
+      max-width: 880px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Running head ─────────────────────────────────────────── */
+
+    .running-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 84px;
+    }
+
+    /* ── Layout grid ──────────────────────────────────────────── */
+
+    .row {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 660px);
+      column-gap: 56px;
+      align-items: start;
+    }
+
+    .rule {
+      height: 1px;
+      background: var(--rule);
+      margin: 60px 0;
+    }
+
+    /* ── Hero / intro ─────────────────────────────────────────── */
+
+    .hero-mark {
+      font-size: 15px;
+      color: var(--brand);
+      padding-top: 8px;
+    }
+
+    .hero-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(56px, 8vw, 84px);
+      line-height: 0.97;
+      letter-spacing: -0.02em;
+      margin: 0 0 30px;
+      text-wrap: balance;
+    }
+
+    h1 em {
+      font-style: italic;
+      font-weight: 500;
+      color: var(--brand);
+    }
+
+    .intro-pull {
+      font-family: 'Newsreader', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(20px, 2.4vw, 25px);
+      line-height: 1.5;
+      margin: 0 0 26px;
+      color: var(--ink);
+      text-wrap: pretty;
+    }
+
+    .body-text {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 19px;
+      line-height: 1.68;
+      margin: 0 0 20px;
+      color: var(--ink);
+      text-wrap: pretty;
+    }
+
+    .body-text:last-child {
+      margin-bottom: 0;
+    }
+
+    .body-text em {
+      font-style: italic;
+    }
+
+    .brand-em {
+      font-style: italic;
+      color: var(--brand);
+    }
+
+    a {
+      color: var(--brand);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    a:hover {
+      color: var(--accent);
+    }
+
+    /* ── Section margin ───────────────────────────────────────── */
+
+    .section-num {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+    }
+
+    .section-num span {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .section-rule {
+      width: 22px;
+      height: 2px;
+      background: var(--accent);
+      margin: 10px 0 14px;
+    }
+
+    .margin-note {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+
+    .section-margin {
+      padding-top: 6px;
+    }
+
+    /* ── Section headings ─────────────────────────────────────── */
+
+    h2 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      font-size: 30px;
+      line-height: 1.14;
+      letter-spacing: -0.01em;
+      margin: 0 0 18px;
+      color: var(--ink);
+      text-wrap: balance;
+    }
+
+    /* ── Drop caps ────────────────────────────────────────────── */
+
+    .dropcap-letter {
+      float: left;
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      font-size: 60px;
+      line-height: 0.8;
+      padding: 7px 10px 0 0;
+      color: var(--accent);
+    }
+
+    /* ── Closing flourish ─────────────────────────────────────── */
+
+    .closing-line {
+      font-family: 'Newsreader', Georgia, serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 28px;
+      line-height: 1.3;
+      color: var(--accent);
+      margin: 30px 0 0;
+      text-wrap: balance;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+
+    .footer {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer-rule {
+      height: 1px;
+      background: var(--rule);
+      margin: 60px 0 26px;
+    }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+
+    @media (max-width: 680px) {
+      body {
+        padding: 56px 24px 80px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        row-gap: 20px;
+      }
+
+      .section-margin {
+        display: flex;
+        align-items: center;
+        column-gap: 16px;
+        padding-top: 0;
+      }
+
+      .section-rule {
+        margin: 0;
+        flex-shrink: 0;
+      }
+
+      .margin-note {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <article>
+
+    <!-- Running head -->
+    <div class="running-head">
+      <span>INK worth</span>
+      <span>Offline &middot; by hand &middot; on paper</span>
+    </div>
+
+    <!-- Hero / intro -->
+    <div class="row">
+      <div class="hero-mark">&#9670;</div>
+      <div>
+        <div class="hero-label">A personal project, kept offline and on paper</div>
+        <h1>INK <em>worth</em></h1>
+        <p class="intro-pull">There's a word hiding in the name. Worth, as in value, as in something that earns its place. And ink, the oldest commit we make to an idea. When you put something down in ink, you're saying it matters enough to leave a mark.</p>
+        <p class="body-text">INK worth is built around one conviction: some things are worth doing by hand, offline, on paper. Not because screens are bad, but because the act of writing, rolling dice, and filling pages with your own handwriting does something that typing doesn't. It slows you down in the right way. It makes you the author of your own story, literally.</p>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- 01 · Morning Pages -->
+    <div class="row">
+      <div class="section-margin">
+        <div class="section-num">01<span> / 04</span></div>
+        <div class="section-rule"></div>
+        <div class="margin-note">Three pages.<br>Every morning.<br>Don't read back.</div>
+      </div>
+      <div>
+        <h2>Morning Pages</h2>
+        <p class="body-text"><span class="dropcap-letter">T</span>he first recommendation for anyone new here is the Morning Pages exercise from Julia Cameron's <em>The Artist's Way</em>.</p>
+        <p class="body-text">The practice is three pages, handwritten, first thing in the morning. No editing, no reading back, no audience. You write whatever is in your head until three pages are full, then you stop. That's it. Cameron's point is that the writing clears the static so the rest of your thinking can happen without interference. It doesn't need to be good.</p>
+        <p class="body-text">I recommend it because it works, and because it proves the central idea of this project: <em class="brand-em">you are ink worth</em>. Your thoughts, however scattered, however ordinary, earn a page. Putting them there is the practice.</p>
+        <p class="body-text">The full guide to Morning Pages is here: <a href="{{ '/morning-pages/' | relative_url }}">how to start, what to expect in the first few weeks, what happens when you skip days</a>.</p>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- 02 · Live RPG Sessions -->
+    <div class="row">
+      <div class="section-margin">
+        <div class="section-num">02<span> / 04</span></div>
+        <div class="section-rule"></div>
+        <div class="margin-note">Spring term.<br>Autumn term.<br>Buffer built in.</div>
+      </div>
+      <div>
+        <h2>Live RPG Sessions</h2>
+        <p class="body-text"><span class="dropcap-letter">T</span>he second part of this project is a small live RPG group, running seasonal campaigns tied loosely to the Swedish school calendar: a spring term and an autumn term.</p>
+        <p class="body-text">The model I use is short campaigns: four to eight sessions of actual play, scheduled across a wider block of ten to twelve slots. The extra sessions aren't filler. Life interrupts. Someone gets sick, a date falls through. With buffer built in, the campaign doesn't collapse when that happens. The sessions that don't get used become one-shots, or we skip altogether. No pressure either way.</p>
+        <p class="body-text">Each block focuses on one game system. Season 1 might be <em>Dragonbane</em>. Season 2, <em>Coriolis</em>. The point of keeping it seasonal and named is predictability: everyone knows when the arc ends, everyone knows roughly what we're playing, and there's a natural moment to evaluate whether the group wants to continue.</p>
+        <p class="body-text">Creating your own player character is part of the point. A character can push against who you are, or hold up a mirror to it. Either way, you're testing something real through a fictional proxy. You make choices under pressure and watch how a personality holds up when the dice don't cooperate. The notes you take during a campaign are worth keeping. The sessions accumulate into a story that belongs to the people who were in the room.</p>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- 03 · Solo RPG Adventures and Journaling -->
+    <div class="row">
+      <div class="section-margin">
+        <div class="section-num">03<span> / 04</span></div>
+        <div class="section-rule"></div>
+        <div class="margin-note">First draft<br>stays on paper.</div>
+      </div>
+      <div>
+        <h2>Solo RPG Adventures and Journaling</h2>
+        <p class="body-text"><span class="dropcap-letter">T</span>he third part is solo play and the personal journals that come out of it.</p>
+        <p class="body-text">I'm starting with <em>ION Heart</em> by Parable Games. It's a lo-fi solo TTRPG about a Pilot and their Mech (a companion who has lived many lives with many pilots before yours) exploring a post-war galaxy called the Astral Union. The game runs through Story Circuits: self-contained narrative prompts that you resolve and record in your own journal. No two journals come out the same.</p>
+        <p class="body-text">The adventures I play will begin as handwritten originals, made by pen and ink. What gets shared online will be edited versions of those, cleaned up but derived from the handwritten source. The original stays on paper.</p>
+        <p class="body-text">This matters because the whole point of solo journaling games is that you are the author. The journal is yours. Keeping the first draft in ink is a way of staying honest about that.</p>
+        <p class="body-text">The edited entries go up here: <a href="{{ '/solo_ionheart/' | relative_url }}">the ION Heart journal</a>.</p>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- 04 · What this is not -->
+    <div class="row">
+      <div class="section-margin">
+        <div class="section-num">04<span> / 04</span></div>
+        <div class="section-rule"></div>
+        <div class="margin-note">A notebook.<br>Some dice.<br>A pen.</div>
+      </div>
+      <div>
+        <h2>What this is not</h2>
+        <p class="body-text">INK worth is not a productivity system or a self-improvement program. It's not asking you to optimize your journaling or run campaigns on a schedule that feels like a sprint plan.</p>
+        <p class="body-text">It's a collection of practices that I find worth doing, documented in a way that might be useful to someone else. Everything here can be done with a notebook, some dice, and a pen.</p>
+        <p class="closing-line">That's the whole point.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-rule"></div>
+    <div class="footer">INK worth &middot; made by hand &middot; a notebook, some dice, and a pen</div>
+
+  </article>
+</body>
+</html>

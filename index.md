@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: home
 title: INK worth
 description: "A personal project about doing some things by hand, offline, on paper: morning writing, live RPG sessions, and solo journaling games."
 ---
