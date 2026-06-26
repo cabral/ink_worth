@@ -10,6 +10,10 @@ The site is built with Jekyll using GitHub Pages' native build and the Minima th
 
 - `index.md`: the home page.
 - `morning-pages.md`: the Morning Pages guide, served at `/morning-pages/`.
+- `solo_ionheart.md`: the ION Heart solo journal blog, served at `/solo_ionheart/`.
+- `_posts/`: blog entries for the ION Heart journal. Each post sets
+  `categories: ion-heart` (so it shows on the blog index) and
+  `permalink: /solo_ionheart/:title/` (so its URL nests under the blog).
 
 ## Running it locally
 

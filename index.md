@@ -20,7 +20,7 @@ The practice is three pages, handwritten, first thing in the morning. No editing
 
 I recommend it because it works, and because it proves the central idea of this project: you are ink worth. Your thoughts, however scattered, however ordinary, earn a page. Putting them there is the practice.
 
-A full guide to Morning Pages will live on this site: [how to start, what to expect in the first few weeks, what happens when you skip days]({{ '/morning-pages/' | relative_url }}).
+The full guide to Morning Pages is here: [how to start, what to expect in the first few weeks, what happens when you skip days]({{ '/morning-pages/' | relative_url }}).
 
 ---
 
@@ -45,6 +45,8 @@ I'm starting with [ION Heart](https://www.parablegames.co.uk/pages/ion-heart) by
 The adventures I play will begin as handwritten originals, made by pen and ink. What gets shared online will be edited versions of those, cleaned up but derived from the handwritten source. The original stays on paper.
 
 This matters because the whole point of solo journaling games is that you are the author. The journal is yours. Keeping the first draft in ink is a way of staying honest about that.
+
+The edited entries go up here: [the ION Heart journal]({{ '/solo_ionheart/' | relative_url }}).
 
 ---
 
