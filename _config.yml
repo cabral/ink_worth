@@ -1,0 +1,24 @@
+title: INK worth
+description: "A personal project about doing some things by hand, offline, on paper: morning writing, live RPG sessions, and solo journaling games."
+baseurl: "/ink_worth"
+url: ""
+
+theme: minima
+
+# Quiet, readable defaults. Keep the nav to the pages that exist.
+header_pages:
+  - morning-pages.md
+
+minima:
+  skin: classic
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+exclude:
+  - WRITING_STYLE.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - README.md
