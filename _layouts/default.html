@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title | default: site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+  {% feed_meta %}
+  {% seo %}
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --paper:  #f2eee4;
+      --ink:    #23201a;
+      --rule:   #ddd6c8;
+      --muted:  #8a8170;
+      --accent: #28384a;
+      --brand:  #1f9b94;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Newsreader', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 88px 40px 132px;
+      display: flex;
+      justify-content: center;
+    }
+
+    article {
+      width: 100%;
+      max-width: 880px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Running head / navigation ────────────────────────────── */
+
+    .running-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 84px;
+    }
+
+    .running-head .masthead {
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .site-nav {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .site-nav a {
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.15s ease;
+    }
+
+    .site-nav a:hover {
+      color: var(--ink);
+    }
+
+    .site-nav a[aria-current="page"] {
+      color: var(--brand);
+    }
+
+    /* ── Layout grid (home) ───────────────────────────────────── */
+
+    .row {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 660px);
+      column-gap: 56px;
+      align-items: start;
+    }
+
+    .rule {
+      height: 1px;
+      background: var(--rule);
+      margin: 60px 0;
+    }
+
+    /* ── Hero / intro ─────────────────────────────────────────── */
+
+    .hero-mark {
+      font-size: 15px;
+      color: var(--brand);
+      padding-top: 8px;
+    }
+
+    .hero-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(40px, 6vw, 64px);
+      line-height: 1.04;
+      letter-spacing: -0.02em;
+      margin: 0 0 30px;
+      text-wrap: balance;
+    }
+
+    .hero h1 {
+      font-size: clamp(56px, 8vw, 84px);
+      line-height: 0.97;
+    }
+
+    h1 em {
+      font-style: italic;
+      font-weight: 500;
+      color: var(--brand);
+    }
+
+    .intro-pull {
+      font-family: 'Newsreader', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(20px, 2.4vw, 25px);
+      line-height: 1.5;
+      margin: 0 0 26px;
+      color: var(--ink);
+      text-wrap: pretty;
+    }
+
+    .body-text {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 19px;
+      line-height: 1.68;
+      margin: 0 0 20px;
+      color: var(--ink);
+      text-wrap: pretty;
+    }
+
+    .body-text:last-child {
+      margin-bottom: 0;
+    }
+
+    .body-text em {
+      font-style: italic;
+    }
+
+    .brand-em {
+      font-style: italic;
+      color: var(--brand);
+    }
+
+    a {
+      color: var(--brand);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    a:hover {
+      color: var(--accent);
+    }
+
+    /* ── Section margin (home) ────────────────────────────────── */
+
+    .section-num {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+    }
+
+    .section-num span {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .section-rule {
+      width: 22px;
+      height: 2px;
+      background: var(--accent);
+      margin: 10px 0 14px;
+    }
+
+    .margin-note {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+
+    .section-margin {
+      padding-top: 6px;
+    }
+
+    /* ── Section headings ─────────────────────────────────────── */
+
+    h2 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      font-size: 30px;
+      line-height: 1.14;
+      letter-spacing: -0.01em;
+      margin: 0 0 18px;
+      color: var(--ink);
+      text-wrap: balance;
+    }
+
+    /* ── Drop caps ────────────────────────────────────────────── */
+
+    .dropcap-letter {
+      float: left;
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      font-size: 60px;
+      line-height: 0.8;
+      padding: 7px 10px 0 0;
+      color: var(--accent);
+    }
+
+    /* ── Closing flourish ─────────────────────────────────────── */
+
+    .closing-line {
+      font-family: 'Newsreader', Georgia, serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 28px;
+      line-height: 1.3;
+      color: var(--accent);
+      margin: 30px 0 0;
+      text-wrap: balance;
+    }
+
+    /* ── Prose (content pages and posts) ──────────────────────── */
+
+    .page-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .prose {
+      max-width: 680px;
+    }
+
+    .prose h1 {
+      margin-bottom: 36px;
+    }
+
+    .prose h2 {
+      font-size: 26px;
+      margin: 52px 0 16px;
+    }
+
+    .prose h3 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 600;
+      font-size: 21px;
+      margin: 36px 0 12px;
+      color: var(--ink);
+    }
+
+    .prose p {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 19px;
+      line-height: 1.68;
+      margin: 0 0 20px;
+      color: var(--ink);
+      text-wrap: pretty;
+    }
+
+    .prose em {
+      font-style: italic;
+    }
+
+    .prose ul,
+    .prose ol {
+      font-size: 19px;
+      line-height: 1.68;
+      padding-left: 24px;
+      margin: 0 0 20px;
+    }
+
+    .prose li {
+      margin-bottom: 8px;
+    }
+
+    .prose blockquote {
+      margin: 0 0 24px;
+      padding-left: 22px;
+      border-left: 2px solid var(--rule);
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .prose hr {
+      border: 0;
+      height: 1px;
+      background: var(--rule);
+      margin: 48px 0;
+    }
+
+    /* ── Post / entry list ────────────────────────────────────── */
+
+    .post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 40px;
+    }
+
+    .post-list > li {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .post-list > li:first-child {
+      border-top: 1px solid var(--rule);
+    }
+
+    .post-list h2 {
+      font-size: 24px;
+      margin: 6px 0 10px;
+    }
+
+    .post-list h2 a {
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .post-list h2 a:hover {
+      color: var(--brand);
+    }
+
+    .post-meta {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .post-list p {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+
+    .footer {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer-rule {
+      height: 1px;
+      background: var(--rule);
+      margin: 60px 0 26px;
+    }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+
+    @media (max-width: 680px) {
+      body {
+        padding: 56px 24px 80px;
+      }
+
+      .running-head {
+        margin-bottom: 56px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        row-gap: 20px;
+      }
+
+      .section-margin {
+        display: flex;
+        align-items: center;
+        column-gap: 16px;
+        padding-top: 0;
+      }
+
+      .section-rule {
+        margin: 0;
+        flex-shrink: 0;
+      }
+
+      .margin-note {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <article>
+
+    {% include nav.html %}
+
+    {{ content }}
+
+    <div class="footer-rule"></div>
+    <div class="footer">INK worth &middot; made by hand &middot; a notebook, some dice, and a pen</div>
+
+  </article>
+</body>
+</html>

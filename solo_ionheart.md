@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: ION Heart
 permalink: /solo_ionheart/
 description: "A solo journaling blog for ION Heart by Parable Games: a Pilot, a Mech, and the Astral Union, one Story Circuit at a time."
@@ -25,5 +25,3 @@ Each entry is one or more Story Circuits played out by hand and then edited for 
 {% else %}
 <p>No entries yet. The first one is coming.</p>
 {% endif %}
-
-[Back home]({{ '/' | relative_url }})

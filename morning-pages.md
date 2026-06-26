@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: Morning Pages
 permalink: /morning-pages/
 description: "A guide to Morning Pages: three handwritten pages, first thing, no audience."
@@ -46,5 +46,3 @@ A missed morning is not a failure and not a reason to stop. There's no streak he
 Missing one morning rarely matters on its own. What can matter is the story that grows out of it, the one where you're "someone who couldn't keep it up." The gap and the story are separate things, and only the story ends the practice. A week away, or a month, costs you nothing but the days you didn't write. However far you've drifted, the way back is the same as the way in.
 
 Open the notebook tomorrow morning and fill three pages.
-
-[Back home]({{ '/' | relative_url }})
