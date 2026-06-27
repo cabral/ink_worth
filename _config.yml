@@ -5,14 +5,6 @@ url: ""
 
 theme: minima
 
-# Quiet, readable defaults. Keep the nav to the pages that exist.
-header_pages:
-  - morning-pages.md
-  - solo_ionheart.md
-
-minima:
-  skin: classic
-
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
