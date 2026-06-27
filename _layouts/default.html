@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page.title | default: site.title }}</title>
   <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="icon" href="{{ '/favicon/favicon.ico' | relative_url }}" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="{{ '/favicon/favicon.svg' | relative_url }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ '/favicon/favicon-32.png' | relative_url }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ '/favicon/favicon-16.png' | relative_url }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ '/favicon/apple-touch-icon.png' | relative_url }}">
+  <link rel="manifest" href="{{ '/favicon/site.webmanifest' | relative_url }}">
+  <meta name="theme-color" content="#17130d">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
@@ -110,9 +117,25 @@
     /* ── Hero / intro ─────────────────────────────────────────── */
 
     .hero-mark {
-      font-size: 15px;
-      color: var(--brand);
-      padding-top: 8px;
+      padding-top: 6px;
+    }
+
+    .hero-mark img {
+      display: block;
+      width: 64px;
+      height: 64px;
+    }
+
+    @media (max-width: 680px) {
+      .hero-mark {
+        padding-top: 0;
+        margin-bottom: 4px;
+      }
+
+      .hero-mark img {
+        width: 52px;
+        height: 52px;
+      }
     }
 
     .hero-label {
