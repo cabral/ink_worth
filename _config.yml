@@ -20,8 +20,8 @@ plugins:
 # to the browser. Leave the placeholders in place and the reservation
 # widgets degrade gracefully to a "not yet configured" notice.
 supabase:
-  url: "https://YOUR-PROJECT.supabase.co"
-  anon_key: "YOUR-SUPABASE-ANON-KEY"
+  url: "https://jsyyunqdelgzcgrgucav.supabase.co"
+  anon_key: "sb_publishable_kTeof0Z9sFoGWXQCc0Q2MA_Zw1slKvV"
 
 # Events are a Jekyll collection. Each file in _events/ becomes a page.
 collections:
