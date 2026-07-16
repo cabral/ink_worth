@@ -1,0 +1,84 @@
+---
+layout: default
+---
+
+{% include events-style.html %}
+
+{% assign su = site.supabase %}
+<div class="prose">
+  <div class="event-header__system">
+    {% if page.system %}{{ page.system }} &middot; {% endif %}Reserve a seat
+  </div>
+  <h1>{{ page.title }}</h1>
+
+  <dl class="event-detail-meta">
+    <div>
+      <dt>Date</dt>
+      <dd>{% if page.date %}{{ page.date | date: "%A %-d %B %Y" }}{% else %}TBA{% endif %}</dd>
+    </div>
+    <div>
+      <dt>Time</dt>
+      <dd>{{ page.time | default: "TBA" }}</dd>
+    </div>
+    <div>
+      <dt>Location</dt>
+      <dd>{{ page.location | default: "TBA" }}</dd>
+    </div>
+    <div>
+      <dt>Capacity</dt>
+      <dd>{{ page.capacity | default: 0 }} players</dd>
+    </div>
+  </dl>
+
+  {{ content }}
+
+  <div class="reservation-widget"
+       data-inkworth-widget
+       data-supabase-url="{{ su.url }}"
+       data-supabase-key="{{ su.anon_key }}"
+       data-slug="{{ page.event_id }}"
+       data-capacity="{{ page.capacity | default: 0 }}"
+       data-status="{{ page.status | default: 'open' | downcase }}">
+
+    <div class="reservation-widget__status">
+      <p class="reservation-widget__title">Seats</p>
+      <span class="availability" data-inkworth-availability
+            data-slug="{{ page.event_id }}"
+            data-capacity="{{ page.capacity | default: 0 }}">Checking availability…</span>
+    </div>
+    <div class="seat-meter"><div class="seat-meter__fill"></div></div>
+
+    <div class="reservation-form__actions" data-inkworth-actions>
+      <button type="button" class="btn" data-inkworth-toggle hidden>Reserve Spot</button>
+    </div>
+
+    <form class="reservation-form" data-inkworth-form hidden novalidate>
+      <div class="field">
+        <label for="res-name-{{ page.event_id }}">Name</label>
+        <input id="res-name-{{ page.event_id }}" name="name" type="text" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="res-email-{{ page.event_id }}">Email <span class="optional">(optional)</span></label>
+        <input id="res-email-{{ page.event_id }}" name="email" type="email" autocomplete="email">
+      </div>
+      <div class="field field--seats">
+        <label for="res-seats-{{ page.event_id }}">Seats</label>
+        <input id="res-seats-{{ page.event_id }}" name="seats" type="number" min="1" max="20" step="1" value="1" required>
+      </div>
+      <div class="field">
+        <label for="res-notes-{{ page.event_id }}">Note <span class="optional">(optional)</span></label>
+        <textarea id="res-notes-{{ page.event_id }}" name="notes" rows="2" placeholder="e.g. Me and my girlfriend"></textarea>
+      </div>
+      <div class="reservation-form__actions">
+        <button type="submit" class="btn" data-inkworth-submit>Submit reservation</button>
+        <button type="button" class="btn btn--ghost" data-inkworth-cancel>Cancel</button>
+      </div>
+    </form>
+
+    <p class="form-message" data-inkworth-message hidden></p>
+  </div>
+
+  <a class="link-back" href="{{ '/events/' | relative_url }}">← All events</a>
+</div>
+
+<script src="{{ '/assets/js/reservations.js' | relative_url }}" defer></script>

@@ -5,9 +5,36 @@ url: ""
 
 theme: minima
 
+# Events are dated in the future by nature; build them anyway (Jekyll hides
+# future-dated documents by default).
+future: true
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+
+# ── RPG event reservations ──────────────────────────────────────────
+# Reservation state lives in Supabase, not in the repository. Fill these
+# in after creating a Supabase project (see supabase/README.md). The
+# anon key is a public, publishable key — it is safe to commit and ship
+# to the browser. Leave the placeholders in place and the reservation
+# widgets degrade gracefully to a "not yet configured" notice.
+supabase:
+  url: "https://jsyyunqdelgzcgrgucav.supabase.co"
+  anon_key: "sb_publishable_kTeof0Z9sFoGWXQCc0Q2MA_Zw1slKvV"
+
+# Events are a Jekyll collection. Each file in _events/ becomes a page.
+collections:
+  events:
+    output: true
+    permalink: /events/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: events
+    values:
+      layout: event
 
 exclude:
   - WRITING_STYLE.md
@@ -15,3 +42,4 @@ exclude:
   - Gemfile.lock
   - vendor
   - README.md
+  - supabase

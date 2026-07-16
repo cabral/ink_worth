@@ -3,6 +3,7 @@
   <a class="masthead" href="{{ '/' | relative_url }}">INK worth</a>
   <div class="site-nav">
     <a href="{{ '/' | relative_url }}"{% if url == '/' %} aria-current="page"{% endif %}>Home</a>
+    <a href="{{ '/events/' | relative_url }}"{% if url contains '/events' %} aria-current="page"{% endif %}>Events</a>
     <a href="{{ '/morning-pages/' | relative_url }}"{% if url contains '/morning-pages' %} aria-current="page"{% endif %}>Morning Pages</a>
     <a href="{{ '/solo_ionheart/' | relative_url }}"{% if url contains '/solo_ionheart' %} aria-current="page"{% endif %}>ION Heart</a>
   </div>

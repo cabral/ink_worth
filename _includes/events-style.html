@@ -1,0 +1,302 @@
+{% comment %}
+  Styles for the event index and event detail pages. Kept in an include so
+  both layouts share one source, and so the global CSS in default.html stays
+  focused on the editorial content pages. Reuses the site's :root variables
+  (--paper, --ink, --rule, --muted, --accent, --brand).
+{% endcomment %}
+<style>
+  /* ── Event index ──────────────────────────────────────────────── */
+
+  .event-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+  }
+
+  .event-list > li {
+    padding: 30px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .event-list > li:first-child {
+    border-top: 1px solid var(--rule);
+  }
+
+  .event-card__system {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 10px;
+  }
+
+  .event-card__title {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.14;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+  }
+
+  .event-card__title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .event-card__title a:hover {
+    color: var(--brand);
+  }
+
+  .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 26px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .event-meta strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .event-card__excerpt {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin: 0 0 14px;
+    max-width: 640px;
+    text-wrap: pretty;
+  }
+
+  /* ── Availability badge + seat meter ──────────────────────────── */
+
+  .availability {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .availability[data-state="full"] { color: var(--muted); }
+  .availability[data-state="closed"] { color: var(--muted); }
+  .availability[data-state="error"] { color: var(--muted); }
+
+  .seat-meter {
+    height: 4px;
+    width: 100%;
+    max-width: 260px;
+    background: var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .seat-meter__fill {
+    height: 100%;
+    background: var(--brand);
+    width: 0;
+    transition: width 0.4s ease;
+  }
+
+  .availability[data-state="full"] ~ .seat-meter .seat-meter__fill,
+  .seat-meter__fill[data-full="true"] {
+    background: var(--accent);
+  }
+
+  /* ── Event detail header ──────────────────────────────────────── */
+
+  .event-header__system {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 18px;
+  }
+
+  .event-detail-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+    padding: 22px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin: 0 0 34px;
+  }
+
+  .event-detail-meta dt {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .event-detail-meta dd {
+    margin: 0;
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 19px;
+    color: var(--ink);
+  }
+
+  /* ── Reservation widget ───────────────────────────────────────── */
+
+  .reservation-widget {
+    margin: 40px 0 0;
+    padding: 30px 32px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .reservation-widget__status {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .reservation-widget__title {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500;
+    font-size: 21px;
+    margin: 0;
+  }
+
+  .btn {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 12px 22px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .btn:hover {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--paper);
+  }
+
+  .btn:disabled {
+    background: var(--rule);
+    border-color: var(--rule);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  .btn--ghost:hover {
+    background: var(--accent);
+    color: var(--paper);
+  }
+
+  .reservation-form {
+    margin-top: 24px;
+  }
+
+  .reservation-form[hidden] { display: none; }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field label {
+    display: block;
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+
+  .field .optional {
+    color: var(--rule);
+    letter-spacing: 0.1em;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 18px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 11px 13px;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--brand);
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 72px;
+  }
+
+  .field--seats input {
+    max-width: 110px;
+  }
+
+  .reservation-form__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .form-message {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.5;
+    margin: 20px 0 0;
+    padding: 14px 16px;
+    border-radius: 2px;
+    border-left: 3px solid var(--rule);
+    color: var(--ink);
+  }
+
+  .form-message[hidden] { display: none; }
+  .form-message--success { border-left-color: var(--brand); background: rgba(31, 155, 148, 0.08); }
+  .form-message--error   { border-left-color: var(--accent); background: rgba(40, 56, 74, 0.06); }
+  .form-message--info    { border-left-color: var(--muted); }
+
+  .link-back {
+    display: block;
+    margin-top: 40px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
