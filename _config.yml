@@ -1,7 +1,8 @@
 title: INK worth
 description: "A personal project about doing some things by hand, offline, on paper: morning writing, live RPG sessions, and solo journaling games."
 baseurl: "/ink_worth"
-url: ""
+url: "https://cabral.github.io"
+timezone: Europe/Stockholm
 
 theme: minima
 

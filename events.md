@@ -5,41 +5,72 @@ permalink: /events/
 description: "Upcoming tabletop RPG sessions in Stockholm: one-shots, seasonal campaigns, and special events. Reserve a seat."
 ---
 
-{% include events-style.html %}
+{% comment %}
+  Events split into upcoming and past by date at build time. GitHub Pages
+  only rebuilds on push, so reservations.js also checks the date in the
+  browser and stops taking reservations for a session that has passed.
+{% endcomment %}
+{% assign today = site.time | date: '%F' %}
+{% assign events = site.events | sort: 'date' %}
+{% assign upcoming_count = 0 %}
+{% for event in events %}
+  {% assign day = event.date | date: '%F' %}
+  {% if day >= today %}{% assign upcoming_count = upcoming_count | plus: 1 %}{% endif %}
+{% endfor %}
+{% assign past_count = events.size | minus: upcoming_count %}
 
-{% assign su = site.supabase %}
 <div class="prose">
-  <div class="page-label">Stockholm RPG · reserve a seat</div>
+  <p class="page-label">Part 02 &middot; Live RPG in Stockholm</p>
   <h1>Events</h1>
 
   <p>Upcoming sessions, one-shots, and seasonal campaign games. Seats are limited
   and reservations are first come, first served, with no account or login needed.
   Open an event to reserve, or to join the waiting list once it's full.</p>
 
-  {% assign upcoming = site.events | sort: 'date' %}
-  {% if upcoming.size == 0 %}
-    <p><em>No events scheduled just yet. Check back soon.</em></p>
+  <h2 class="list-heading">Upcoming</h2>
+  {% if upcoming_count == 0 %}
+    <p><em>No sessions scheduled just yet. Check back soon.</em></p>
   {% else %}
-  <ul class="event-list" data-supabase-url="{{ su.url }}" data-supabase-key="{{ su.anon_key }}">
-    {% for event in upcoming %}
+  <ul class="event-list">
+    {% for event in events %}
+    {% assign day = event.date | date: '%F' %}
+    {% if day >= today %}
     <li class="event-card">
-      {% if event.system %}<div class="event-card__system">{{ event.system }}</div>{% endif %}
-      <h2 class="event-card__title"><a href="{{ event.url | relative_url }}">{{ event.title }}</a></h2>
-      <div class="event-meta">
-        {% if event.date %}<span><strong>{{ event.date | date: "%a %-d %b" }}</strong></span>{% endif %}
-        {% if event.time %}<span>{{ event.time }}</span>{% endif %}
-        {% if event.location %}<span>{{ event.location }}</span>{% endif %}
+      <time class="event-date" datetime="{{ day }}">
+        <span>{{ event.date | date: "%a" }}</span>
+        <span class="event-date__day">{{ event.date | date: "%-d" }}</span>
+        <span>{{ event.date | date: "%b" }}</span>
+      </time>
+      <div>
+        <h3 class="event-card__title"><a href="{{ event.url | relative_url }}">{{ event.title }}</a></h3>
+        <p class="event-meta">
+          {% if event.time %}<span>{{ event.time }}</span>{% endif %}
+          {% if event.location %}<span>{{ event.location }}</span>{% endif %}
+          {% if event.system %}<span>{{ event.system }}</span>{% endif %}
+        </p>
+        {% if event.summary %}<p class="event-card__excerpt">{{ event.summary }}</p>{% endif %}
+        {% include seats.html event=event %}
       </div>
-      {% if event.summary %}<p class="event-card__excerpt">{{ event.summary }}</p>{% endif %}
-      <span class="availability" data-inkworth-availability
-            data-slug="{{ event.event_id }}"
-            data-capacity="{{ event.capacity | default: 0 }}"
-            data-status="{{ event.status | default: 'open' | downcase }}">Checking availability…</span>
-      <div class="seat-meter"><div class="seat-meter__fill"></div></div>
     </li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if past_count > 0 %}
+  <h2 class="list-heading">Past sessions</h2>
+  <ul class="past-list">
+    {% for event in events reversed %}
+    {% assign day = event.date | date: '%F' %}
+    {% if day < today %}
+    <li>
+      <time datetime="{{ day }}">{{ event.date | date: "%-d %b %Y" }}</time>
+      <a href="{{ event.url | relative_url }}">{{ event.title }}</a>
+    </li>
+    {% endif %}
     {% endfor %}
   </ul>
   {% endif %}
 </div>
 
-<script src="{{ '/assets/js/reservations.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/reservations.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

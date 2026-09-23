@@ -4,7 +4,7 @@ layout: default
 
 <!-- Hero / intro -->
 <div class="row hero">
-  <div class="hero-mark"><img src="{{ '/favicon/mark.svg' | relative_url }}" alt="INK worth mark" width="64" height="64"></div>
+  <div class="hero-mark">{% include mark.html %}</div>
   <div>
     <div class="hero-label">A personal project, kept offline and on paper</div>
     <h1>INK <em>worth</em></h1>
@@ -24,7 +24,7 @@ layout: default
   </div>
   <div>
     <h2>Morning Pages</h2>
-    <p class="body-text"><span class="dropcap-letter">T</span>he first recommendation for anyone new here is the Morning Pages exercise from Julia Cameron's <em>The Artist's Way</em>.</p>
+    <p class="body-text dropcap">The first recommendation for anyone new here is the Morning Pages exercise from Julia Cameron's <em>The Artist's Way</em>.</p>
     <p class="body-text">The practice is three pages, handwritten, first thing in the morning. No editing, no reading back, no audience. You write whatever is in your head until three pages are full, then you stop. That's it. Cameron's point is that the writing clears the static so the rest of your thinking can happen without interference. It doesn't need to be good.</p>
     <p class="body-text">I recommend it because it works, and because it proves the central idea of this project: <em class="brand-em">you are ink worth</em>. Your thoughts, however scattered, however ordinary, earn a page. Putting them there is the practice.</p>
     <p class="body-text">The full guide to Morning Pages is here: <a href="{{ '/morning-pages/' | relative_url }}">how to start, what to expect in the first few weeks, what happens when you skip days</a>.</p>
@@ -42,11 +42,35 @@ layout: default
   </div>
   <div>
     <h2>Live RPG Sessions</h2>
-    <p class="body-text"><span class="dropcap-letter">T</span>he second part of this project is a small live RPG group, running seasonal campaigns tied loosely to the Swedish school calendar: a spring term and an autumn term.</p>
+    <p class="body-text dropcap">The second part of this project is a small live RPG group, running seasonal campaigns tied loosely to the Swedish school calendar: a spring term and an autumn term.</p>
     <p class="body-text">The model I use is short campaigns: four to eight sessions of actual play, scheduled across a wider block of ten to twelve slots. The extra sessions aren't filler. Life interrupts. Someone gets sick, a date falls through. With buffer built in, the campaign doesn't collapse when that happens. The sessions that don't get used become one-shots, or we skip altogether. No pressure either way.</p>
     <p class="body-text">Each block focuses on one game system. Season 1 might be <em>Dragonbane</em>. Season 2, <em>Coriolis</em>. The point of keeping it seasonal and named is predictability: everyone knows when the arc ends, everyone knows roughly what we're playing, and there's a natural moment to evaluate whether the group wants to continue.</p>
     <p class="body-text">Creating your own player character is part of the point. A character can push against who you are, or hold up a mirror to it. Either way, you're testing something real through a fictional proxy. You make choices under pressure and watch how a personality holds up when the dice don't cooperate. The notes you take during a campaign are worth keeping. The sessions accumulate into a story that belongs to the people who were in the room.</p>
     <p class="body-text">Sessions and one-shots are posted here as they're scheduled: <a href="{{ '/events/' | relative_url }}">see upcoming events and reserve a seat</a>.</p>
+
+    {% assign today = site.time | date: '%F' %}
+    {% assign shown = 0 %}
+    {% capture up_next %}
+      {% assign events = site.events | sort: 'date' %}
+      {% for event in events %}
+        {% assign day = event.date | date: '%F' %}
+        {% if day >= today and shown < 3 %}
+          {% assign shown = shown | plus: 1 %}
+          <li class="up-next__item">
+            <time class="up-next__date" datetime="{{ day }}">{{ event.date | date: "%a %-d %b" }}</time>
+            <a class="up-next__title" href="{{ event.url | relative_url }}">{{ event.title }}</a>
+            {% include seats.html event=event %}
+          </li>
+        {% endif %}
+      {% endfor %}
+    {% endcapture %}
+    {% if shown > 0 %}
+    <div class="up-next">
+      <h3 class="list-heading">Coming up</h3>
+      <ul class="up-next__list">{{ up_next }}</ul>
+    </div>
+    <script src="{{ '/assets/js/reservations.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+    {% endif %}
   </div>
 </div>
 
@@ -61,8 +85,8 @@ layout: default
   </div>
   <div>
     <h2>Solo RPG Adventures and Journaling</h2>
-    <p class="body-text"><span class="dropcap-letter">T</span>he third part is solo play and the personal journals that come out of it.</p>
-    <p class="body-text">I'm starting with <em>ION Heart</em> by Parable Games. It's a lo-fi solo TTRPG about a Pilot and their Mech (a companion who has lived many lives with many pilots before yours) exploring a post-war galaxy called the Astral Union. The game runs through Story Circuits: self-contained narrative prompts that you resolve and record in your own journal. No two journals come out the same.</p>
+    <p class="body-text dropcap">The third part is solo play and the personal journals that come out of it.</p>
+    <p class="body-text">I'm starting with <a href="https://www.parablegames.co.uk/pages/ion-heart"><em>ION Heart</em></a> by Parable Games. It's a lo-fi solo TTRPG about a Pilot and their Mech (a companion who has lived many lives with many pilots before yours) exploring a post-war galaxy called the Astral Union. The game runs through Story Circuits: self-contained narrative prompts that you resolve and record in your own journal. No two journals come out the same.</p>
     <p class="body-text">The adventures I play will begin as handwritten originals, made by pen and ink. What gets shared online will be edited versions of those, cleaned up but derived from the handwritten source. The original stays on paper.</p>
     <p class="body-text">This matters because the whole point of solo journaling games is that you are the author. The journal is yours. Keeping the first draft in ink is a way of staying honest about that.</p>
     <p class="body-text">The edited entries go up here: <a href="{{ '/solo_ionheart/' | relative_url }}">the ION Heart journal</a>.</p>

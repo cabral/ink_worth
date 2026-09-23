@@ -1,11 +1,21 @@
 ---
 layout: page
 title: Morning Pages
+label: "Part 01 · A guide"
 permalink: /morning-pages/
 description: "A guide to Morning Pages: three handwritten pages, first thing, no audience."
 ---
 
 # Morning Pages
+{:.no_toc}
+
+<nav class="toc" aria-label="In this guide" markdown="1">
+<p class="toc__label">In this guide</p>
+
+* TOC
+{:toc}
+
+</nav>
 
 Morning Pages come from Julia Cameron's *The Artist's Way*, which calls them the bedrock tool of the whole method. The practice is three pages, handwritten, first thing in the morning. No editing, no reading back, no audience. You write whatever is in your head until three pages are full, then you stop.
 
