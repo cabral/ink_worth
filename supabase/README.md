@@ -83,3 +83,18 @@ is a deliberate manual step so a human confirms each hand-off.
 | Anonymous visitor | **Cannot** read anyone's name, email, or notes, and cannot write to any table directly. |
 | Edge function (`service_role`) | Calls the locking SQL functions to insert reservations. |
 | You (dashboard) | Full access to every table. |
+
+`event_availability` runs as the visitor (`security_invoker`), so it gets no
+special access. The totals come from `private.event_availability()`, a
+SECURITY DEFINER function in a schema the API does not expose. That function
+is the only thing that reads the private tables on a visitor's behalf, so it
+is the one place to review before adding a column. Don't switch the view back
+to a plain view: Supabase's security advisor reports that as "Security
+Definer View", because it bypasses row-level security implicitly.
+
+## Applying schema changes to an existing project
+
+New changes arrive as files in [`migrations/`](./migrations/). Apply them with
+`supabase db push` from a linked CLI, or paste the new migration file into
+*SQL Editor → New query* and run it. Each migration is safe to re-run.
+`schema.sql` always holds the complete current schema for new projects.
