@@ -56,31 +56,64 @@ create index if not exists reservations_event_id_idx on public.reservations (eve
 create index if not exists waiting_list_event_id_idx  on public.waiting_list  (event_id);
 
 -- ── Availability view ───────────────────────────────────────────────────────
--- Aggregates only. Runs with the view owner's privileges (security_invoker is
--- off by default) so it can total the private reservations table without
--- exposing individual rows. This is what the website reads to show seat counts.
-create or replace view public.event_availability as
-select
-  e.slug,
-  e.title,
-  e.capacity,
-  e.event_date,
-  e.location,
-  coalesce(r.reserved, 0)                             as reserved,
-  greatest(e.capacity - coalesce(r.reserved, 0), 0)   as remaining,
-  (coalesce(r.reserved, 0) >= e.capacity)             as is_full,
-  coalesce(w.waiting, 0)                              as waiting
-from public.events e
-left join (
-  select event_id, sum(seats)::int as reserved
-  from public.reservations
-  group by event_id
-) r on r.event_id = e.id
-left join (
-  select event_id, sum(seats)::int as waiting
-  from public.waiting_list
-  group by event_id
-) w on w.event_id = e.id;
+-- Aggregates only. This is what the website reads to show seat counts.
+--
+-- Totalling the private reservations table needs privileges the anon role
+-- doesn't have, so that one step is an explicit SECURITY DEFINER function in
+-- the `private` schema, which the API does not expose. The public view runs
+-- as the caller (security_invoker) and only reads that function's output.
+-- A plain view with security_invoker off would bypass RLS implicitly, which
+-- the Supabase security advisor reports as "Security Definer View".
+create schema if not exists private;
+
+create or replace function private.event_availability()
+returns table (
+  slug        text,
+  title       text,
+  capacity    integer,
+  event_date  date,
+  location    text,
+  reserved    integer,
+  remaining   integer,
+  is_full     boolean,
+  waiting     integer
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    e.slug,
+    e.title,
+    e.capacity,
+    e.event_date,
+    e.location,
+    coalesce(r.reserved, 0),
+    greatest(e.capacity - coalesce(r.reserved, 0), 0),
+    coalesce(r.reserved, 0) >= e.capacity,
+    coalesce(w.waiting, 0)
+  from public.events e
+  left join (
+    select event_id, sum(seats)::int as reserved
+    from public.reservations
+    group by event_id
+  ) r on r.event_id = e.id
+  left join (
+    select event_id, sum(seats)::int as waiting
+    from public.waiting_list
+    group by event_id
+  ) w on w.event_id = e.id;
+$$;
+
+revoke all on function private.event_availability() from public;
+grant usage on schema private to anon, authenticated;
+grant execute on function private.event_availability() to anon, authenticated;
+
+create or replace view public.event_availability
+  with (security_invoker = true)
+as
+select * from private.event_availability();
 
 -- ── Row level security ──────────────────────────────────────────────────────
 -- Lock every table down. The public (anon) role gets no direct table access at
@@ -90,8 +123,9 @@ alter table public.reservations  enable row level security;
 alter table public.waiting_list  enable row level security;
 
 -- No permissive policies are created, so RLS denies all anon/authenticated
--- direct access by default. The service_role (used by the edge function and
--- by these SECURITY DEFINER functions) bypasses RLS.
+-- direct access by default. The service_role (used by the edge function) and
+-- the SECURITY DEFINER functions (private.event_availability and the RPCs
+-- below) bypass RLS.
 
 -- Grant read on the aggregate view to the public API roles.
 grant select on public.event_availability to anon, authenticated;

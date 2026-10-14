@@ -1,0 +1,15 @@
+{% comment %}
+  Live seat availability for one event: a row of seat squares and a label.
+  assets/js/reservations.js fills both in from Supabase. Usage:
+    {% include seats.html event=event %}
+{% endcomment %}
+{% assign e = include.event %}
+<div class="seats" data-inkworth-availability
+     data-supabase-url="{{ site.supabase.url }}"
+     data-supabase-key="{{ site.supabase.anon_key }}"
+     data-slug="{{ e.event_id }}"
+     data-status="{{ e.status | default: 'open' | downcase }}"
+     data-date="{{ e.date | date: '%F' }}">
+  <span class="seats__pips" aria-hidden="true"></span>
+  <span class="seats__label">Checking availability…</span>
+</div>

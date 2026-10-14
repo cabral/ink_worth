@@ -8,7 +8,8 @@ The site is built with Jekyll using GitHub Pages' native build and the Minima th
 
 ## Pages
 
-- `index.md`: the home page.
+- `index.md`: the home page's front matter. The copy itself lives in
+  `_layouts/home.html`, which lays it out on the margin-note grid.
 - `morning-pages.md`: the Morning Pages guide, served at `/morning-pages/`.
 - `solo_ionheart.md`: the ION Heart solo journal blog, served at `/solo_ionheart/`.
 - `_posts/`: blog entries for the ION Heart journal. Each post sets
@@ -17,6 +18,8 @@ The site is built with Jekyll using GitHub Pages' native build and the Minima th
 - `events.md`: the events index, served at `/events/`.
 - `_events/`: one file per RPG event. Each becomes a page at
   `/events/<name>/` with a reservation form.
+- `assets/css/site.css`: every style on the site, including the dark-mode
+  palette. Colours are tokens at the top of the file.
 
 ## RPG event reservations
 
@@ -53,6 +56,12 @@ Adding an event is the usual Git workflow:
 Note: events are naturally future-dated, so `_config.yml` sets `future: true`
 (Jekyll hides future-dated documents otherwise).
 
+Once an event's date has passed it moves to "Past sessions" on the events
+index and its page stops taking reservations. That split happens at build
+time, and because Pages only rebuilds on push, `assets/js/reservations.js`
+checks the date again in the browser. The next three upcoming events also
+show on the home page under section 02.
+
 The backend (SQL schema, atomic reservation function, edge function, and full
 setup steps) lives under `supabase/`. See `supabase/README.md`. Until you fill
 in the `supabase:` block in `_config.yml`, the reservation widgets degrade
@@ -60,7 +69,10 @@ gracefully to a "not set up yet" notice.
 
 ## Running it locally
 
-You need Ruby and Bundler. From the repository root:
+You need Ruby 3.4 (pinned in `mise.toml`) and Bundler. Ruby 4.0 won't work:
+the `commonmarker` version that `github-pages` depends on declares `ruby < 4.0`,
+so Bundler falls back to an ancient `github-pages` that won't compile. From the
+repository root:
 
 ```
 bundle install

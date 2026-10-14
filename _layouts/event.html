@@ -2,19 +2,19 @@
 layout: default
 ---
 
-{% include events-style.html %}
-
-{% assign su = site.supabase %}
+{% assign today = site.time | date: '%F' %}
+{% assign day = page.date | date: '%F' %}
+{% assign id = page.event_id %}
 <div class="prose">
-  <div class="event-header__system">
-    {% if page.system %}{{ page.system }} &middot; {% endif %}Reserve a seat
-  </div>
+  <p class="page-label event-eyebrow">
+    {% if page.system %}{{ page.system }} &middot; {% endif %}{% if day < today %}Past session{% else %}Reserve a seat{% endif %}
+  </p>
   <h1>{{ page.title }}</h1>
 
-  <dl class="event-detail-meta">
+  <dl class="event-facts">
     <div>
       <dt>Date</dt>
-      <dd>{% if page.date %}{{ page.date | date: "%A %-d %B %Y" }}{% else %}TBA{% endif %}</dd>
+      <dd>{% if page.date %}<time datetime="{{ day }}">{{ page.date | date: "%A %-d %B %Y" }}</time>{% else %}TBA{% endif %}</dd>
     </div>
     <div>
       <dt>Time</dt>
@@ -25,60 +25,60 @@ layout: default
       <dd>{{ page.location | default: "TBA" }}</dd>
     </div>
     <div>
-      <dt>Capacity</dt>
-      <dd>{{ page.capacity | default: 0 }} players</dd>
+      <dt>Players</dt>
+      <dd>Up to {{ page.capacity | default: 0 }}</dd>
     </div>
   </dl>
 
   {{ content }}
 
-  <div class="reservation-widget"
-       data-inkworth-widget
-       data-supabase-url="{{ su.url }}"
-       data-supabase-key="{{ su.anon_key }}"
-       data-slug="{{ page.event_id }}"
-       data-capacity="{{ page.capacity | default: 0 }}"
-       data-status="{{ page.status | default: 'open' | downcase }}">
+  <section class="reservation" aria-labelledby="reservation-title">
+    {% if day < today %}
+    <h2 class="reservation__title" id="reservation-title">This session has passed</h2>
+    <p>Reservations are closed. <a href="{{ '/events/' | relative_url }}">See what's coming up</a>.</p>
+    {% else %}
+    <div data-inkworth-widget>
+      <div class="reservation__head">
+        <h2 class="reservation__title" id="reservation-title">Seats</h2>
+        {% include seats.html event=page %}
+      </div>
 
-    <div class="reservation-widget__status">
-      <p class="reservation-widget__title">Seats</p>
-      <span class="availability" data-inkworth-availability
-            data-slug="{{ page.event_id }}"
-            data-capacity="{{ page.capacity | default: 0 }}">Checking availability…</span>
+      <noscript><p>Online reservations need JavaScript. Contact the organizer to hold a seat.</p></noscript>
+
+      <button type="button" class="btn reservation__toggle" data-inkworth-toggle hidden>Reserve a seat</button>
+
+      <form class="reservation-form" data-inkworth-form hidden novalidate>
+        <div class="field">
+          <label for="res-name-{{ id }}">Name</label>
+          <input id="res-name-{{ id }}" name="name" type="text" autocomplete="name" required aria-describedby="res-name-error-{{ id }}">
+          <p class="field__error" id="res-name-error-{{ id }}" data-inkworth-name-error hidden>Please enter your name so the organizer knows who's coming.</p>
+        </div>
+        <div class="field">
+          <label for="res-email-{{ id }}">Email <span class="optional">(optional)</span></label>
+          <input id="res-email-{{ id }}" name="email" type="email" autocomplete="email" aria-describedby="res-email-hint-{{ id }}">
+          <p class="field__hint" id="res-email-hint-{{ id }}">Only used to reach you about this session, for example if a seat opens up.</p>
+        </div>
+        <div class="field field--seats">
+          <label for="res-seats-{{ id }}">Seats</label>
+          <input id="res-seats-{{ id }}" name="seats" type="number" inputmode="numeric" min="1" max="20" step="1" value="1" required aria-describedby="res-seats-hint-{{ id }}">
+          <p class="field__hint" id="res-seats-hint-{{ id }}" data-inkworth-seats-hint></p>
+        </div>
+        <div class="field">
+          <label for="res-notes-{{ id }}">Note <span class="optional">(optional)</span></label>
+          <textarea id="res-notes-{{ id }}" name="notes" rows="2" placeholder="e.g. bringing a friend, or first time playing"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn" data-inkworth-submit>Confirm reservation</button>
+          <button type="button" class="btn btn--ghost" data-inkworth-cancel>Cancel</button>
+        </div>
+      </form>
+
+      <p class="form-message" data-inkworth-message role="status" tabindex="-1" hidden></p>
     </div>
-    <div class="seat-meter"><div class="seat-meter__fill"></div></div>
+    {% endif %}
+  </section>
 
-    <div class="reservation-form__actions" data-inkworth-actions>
-      <button type="button" class="btn" data-inkworth-toggle hidden>Reserve Spot</button>
-    </div>
-
-    <form class="reservation-form" data-inkworth-form hidden novalidate>
-      <div class="field">
-        <label for="res-name-{{ page.event_id }}">Name</label>
-        <input id="res-name-{{ page.event_id }}" name="name" type="text" autocomplete="name" required>
-      </div>
-      <div class="field">
-        <label for="res-email-{{ page.event_id }}">Email <span class="optional">(optional)</span></label>
-        <input id="res-email-{{ page.event_id }}" name="email" type="email" autocomplete="email">
-      </div>
-      <div class="field field--seats">
-        <label for="res-seats-{{ page.event_id }}">Seats</label>
-        <input id="res-seats-{{ page.event_id }}" name="seats" type="number" min="1" max="20" step="1" value="1" required>
-      </div>
-      <div class="field">
-        <label for="res-notes-{{ page.event_id }}">Note <span class="optional">(optional)</span></label>
-        <textarea id="res-notes-{{ page.event_id }}" name="notes" rows="2" placeholder="e.g. Me and my girlfriend"></textarea>
-      </div>
-      <div class="reservation-form__actions">
-        <button type="submit" class="btn" data-inkworth-submit>Submit reservation</button>
-        <button type="button" class="btn btn--ghost" data-inkworth-cancel>Cancel</button>
-      </div>
-    </form>
-
-    <p class="form-message" data-inkworth-message hidden></p>
-  </div>
-
-  <a class="link-back" href="{{ '/events/' | relative_url }}">← All events</a>
+  <a class="link-back" href="{{ '/events/' | relative_url }}">&larr; All events</a>
 </div>
 
-<script src="{{ '/assets/js/reservations.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/reservations.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

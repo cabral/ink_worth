@@ -3,5 +3,6 @@ layout: default
 ---
 
 <div class="prose">
+  {% if page.label %}<p class="page-label">{{ page.label }}</p>{% endif %}
   {{ content }}
 </div>

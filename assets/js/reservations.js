@@ -1,11 +1,11 @@
 /* ============================================================================
- * INK worth — reservation frontend
+ * INK worth: reservation frontend
  * ----------------------------------------------------------------------------
  * Plain JavaScript, no framework, no build step. Two responsibilities:
  *
  *   1. Fill in live seat availability for any element marked
- *      [data-inkworth-availability] by reading the public event_availability
- *      view over Supabase's REST API (anon key).
+ *      [data-inkworth-availability] (see _includes/seats.html) by reading the
+ *      public event_availability view over Supabase's REST API (anon key).
  *
  *   2. Wire up the reservation form on an event page
  *      ([data-inkworth-widget]): reveal the form, POST it to the `reserve`
@@ -19,13 +19,14 @@
   "use strict";
 
   var PLACEHOLDER = /YOUR-(PROJECT|SUPABASE)/i;
+  var MAX_SEATS_PER_REQUEST = 20; // matches the edge function's sanity bound.
 
   function isConfigured(url, key) {
     return Boolean(url) && Boolean(key) && !PLACEHOLDER.test(url) && !PLACEHOLDER.test(key);
   }
 
   /* Find the Supabase URL/key for an element: on the element itself, or on the
-   * nearest ancestor that carries them (the widget or the event list). */
+   * nearest ancestor that carries them. */
   function readConfig(el) {
     var host = el.closest("[data-supabase-url]") || el;
     return {
@@ -36,6 +37,14 @@
 
   function restHeaders(key) {
     return { apikey: key, Authorization: "Bearer " + key };
+  }
+
+  /* GitHub Pages only rebuilds on push, so a page built before an event can
+   * outlive it. Compare the event's date with today in Stockholm. */
+  function isPast(el) {
+    var date = el.getAttribute("data-date");
+    var today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Stockholm" });
+    return Boolean(date) && date < today;
   }
 
   /* ── Availability ───────────────────────────────────────────────────────── */
@@ -52,40 +61,33 @@
     });
   }
 
-  function renderAvailability(el, data) {
-    var meter = el.parentElement
-      ? el.parentElement.querySelector(".seat-meter__fill") ||
-        (el.closest(".reservation-widget") || el.closest(".event-card") || document).querySelector(".seat-meter__fill")
-      : null;
-    var status = (el.getAttribute("data-status") || "open").toLowerCase();
-    var capacityAttr = parseInt(el.getAttribute("data-capacity"), 10);
+  function setState(el, state, text) {
+    el.setAttribute("data-state", state);
+    el.querySelector(".seats__label").textContent = text;
+  }
 
-    if (status === "closed") {
-      el.textContent = "Reservations closed";
-      el.setAttribute("data-state", "closed");
-      if (meter) meter.style.width = "0%";
-      return { state: "closed" };
+  /* One square per seat, taken seats first. */
+  function drawSeats(el, capacity, taken) {
+    var pips = el.querySelector(".seats__pips");
+    pips.textContent = "";
+    for (var i = 0; i < capacity; i++) {
+      var seat = document.createElement("span");
+      seat.className = i < taken ? "seat seat--taken" : "seat";
+      pips.appendChild(seat);
     }
+  }
 
-    var capacity = data && typeof data.capacity === "number" ? data.capacity : capacityAttr || 0;
-    var remaining = data && typeof data.remaining === "number" ? data.remaining : capacity;
-    var isFull = data ? Boolean(data.is_full) || remaining <= 0 : false;
-    var reserved = capacity - remaining;
+  function renderAvailability(el, row) {
+    var capacity = row.capacity;
+    var remaining = Math.max(0, row.remaining);
+    var isFull = Boolean(row.is_full) || remaining <= 0;
 
+    drawSeats(el, capacity, capacity - remaining);
     if (isFull) {
-      var waiting = data && data.waiting ? data.waiting : 0;
-      el.textContent = "Fully booked" + (waiting ? " · " + waiting + " on the waiting list" : "");
-      el.setAttribute("data-state", "full");
+      setState(el, "full", "Fully booked" + (row.waiting ? " · " + row.waiting + " on the waiting list" : ""));
     } else {
-      el.textContent = remaining + " of " + capacity + " seats remaining";
-      el.setAttribute("data-state", "open");
+      setState(el, "open", remaining + " of " + capacity + (capacity === 1 ? " seat" : " seats") + " left");
     }
-
-    if (meter && capacity > 0) {
-      meter.style.width = Math.min(100, Math.round((reserved / capacity) * 100)) + "%";
-      meter.setAttribute("data-full", isFull ? "true" : "false");
-    }
-
     return { state: isFull ? "full" : "open", remaining: remaining, capacity: capacity };
   }
 
@@ -93,46 +95,34 @@
     var cfg = readConfig(el);
     var slug = el.getAttribute("data-slug");
     var status = (el.getAttribute("data-status") || "open").toLowerCase();
+    var done = onDone || function () {};
 
-    if (status === "closed") {
-      var closed = renderAvailability(el, null);
-      if (onDone) onDone(closed);
-      return;
+    if (isPast(el)) {
+      setState(el, "past", "This session has passed");
+      done({ state: "past" });
+    } else if (status === "closed") {
+      setState(el, "closed", "Reservations closed");
+      done({ state: "closed" });
+    } else if (!isConfigured(cfg.url, cfg.key) || !slug) {
+      setState(el, "error", "Reservations aren't set up yet");
+      done({ state: "unconfigured" });
+    } else {
+      fetchAvailability(cfg, slug)
+        .then(function (rows) {
+          var row = rows && rows.length ? rows[0] : null;
+          if (row) {
+            done(renderAvailability(el, row));
+          } else {
+            // The event is on the site but hasn't been seeded in Supabase yet.
+            setState(el, "error", "Availability unavailable");
+            done({ state: "error" });
+          }
+        })
+        .catch(function () {
+          setState(el, "error", "Couldn't load availability");
+          done({ state: "error" });
+        });
     }
-
-    if (!isConfigured(cfg.url, cfg.key)) {
-      el.textContent = "Reservations aren't set up yet";
-      el.setAttribute("data-state", "error");
-      if (onDone) onDone({ state: "unconfigured" });
-      return;
-    }
-
-    if (!slug) {
-      el.textContent = "";
-      el.setAttribute("data-state", "error");
-      if (onDone) onDone({ state: "error" });
-      return;
-    }
-
-    fetchAvailability(cfg, slug)
-      .then(function (rows) {
-        var row = rows && rows.length ? rows[0] : null;
-        if (!row) {
-          // No matching row in Supabase yet — event exists on the site but
-          // hasn't been seeded in the database.
-          el.textContent = "Availability unavailable";
-          el.setAttribute("data-state", "error");
-          if (onDone) onDone({ state: "error" });
-          return;
-        }
-        var result = renderAvailability(el, row);
-        if (onDone) onDone(result);
-      })
-      .catch(function () {
-        el.textContent = "Couldn't load availability";
-        el.setAttribute("data-state", "error");
-        if (onDone) onDone({ state: "error" });
-      });
   }
 
   /* ── Reservation widget ─────────────────────────────────────────────────── */
@@ -165,90 +155,62 @@
   }
 
   function initWidget(widget) {
-    var cfg = readConfig(widget);
-    var slug = widget.getAttribute("data-slug");
-    var status = (widget.getAttribute("data-status") || "open").toLowerCase();
+    var seatsEl = widget.querySelector("[data-inkworth-availability]");
+    var cfg = readConfig(seatsEl);
+    var slug = seatsEl.getAttribute("data-slug");
 
-    var availabilityEl = widget.querySelector("[data-inkworth-availability]");
-    var actions = widget.querySelector("[data-inkworth-actions]");
     var toggle = widget.querySelector("[data-inkworth-toggle]");
     var form = widget.querySelector("[data-inkworth-form]");
     var cancel = widget.querySelector("[data-inkworth-cancel]");
     var submit = widget.querySelector("[data-inkworth-submit]");
     var message = widget.querySelector("[data-inkworth-message]");
+    var nameError = widget.querySelector("[data-inkworth-name-error]");
+    var seatsHint = widget.querySelector("[data-inkworth-seats-hint]");
+    var nameInput = form.elements.name;
+    var seatsInput = form.elements.seats;
 
     var mode = "reserve"; // flips to "waitlist" when the event is full.
+    var booked = false; // after a successful booking the toggle stays hidden.
 
+    function submitLabel() {
+      return mode === "waitlist" ? "Join the waiting list" : "Confirm reservation";
+    }
+
+    // Called with every availability result: drives labels, limits and
+    // which controls are visible.
     function applyState(result) {
-      if (!result) return;
-      if (result.state === "unconfigured") {
-        showMessage(
-          message,
-          "info",
-          "Online reservations aren't set up yet. Contact the organizer to hold a seat."
-        );
-        return;
-      }
-      if (result.state === "closed") {
-        showMessage(message, "info", "Reservations for this event are closed.");
-        return;
-      }
-      if (result.state === "error") {
-        toggle.hidden = true;
-        return;
-      }
-      if (result.state === "full") {
-        mode = "waitlist";
-        toggle.textContent = "Join Waiting List";
-        toggle.hidden = false;
+      if (result.state === "open" || result.state === "full") {
+        mode = result.state === "full" ? "waitlist" : "reserve";
+        toggle.textContent = mode === "waitlist" ? "Join the waiting list" : "Reserve a seat";
+        toggle.hidden = booked || !form.hidden;
+        if (!submit.disabled) submit.textContent = submitLabel();
+        if (mode === "waitlist") {
+          seatsInput.max = MAX_SEATS_PER_REQUEST;
+          seatsHint.textContent = "How many seats you'd take if some open up.";
+        } else {
+          seatsInput.max = result.remaining;
+          seatsHint.textContent = "Up to " + result.remaining + " available.";
+        }
       } else {
-        mode = "reserve";
-        toggle.textContent = "Reserve Spot";
-        toggle.hidden = false;
+        toggle.hidden = true;
+        form.hidden = true;
+        if (result.state === "unconfigured") {
+          showMessage(message, "info", "Online reservations aren't set up yet. Contact the organizer to hold a seat.");
+        } else if (result.state === "closed") {
+          showMessage(message, "info", "Reservations for this event are closed.");
+        } else if (result.state === "past") {
+          showMessage(message, "info", "This session has already happened, so reservations are closed.");
+        }
       }
     }
 
-    // Initial availability load drives the button label/visibility.
-    loadAvailability(availabilityEl, applyState);
+    function flagName(invalid) {
+      nameInput.setAttribute("aria-invalid", invalid ? "true" : "false");
+      nameError.hidden = !invalid;
+    }
 
-    toggle.addEventListener("click", function () {
-      form.hidden = false;
-      toggle.hidden = true;
-      message.hidden = true;
-      var firstField = form.querySelector("input, textarea");
-      if (firstField) firstField.focus();
-    });
-
-    cancel.addEventListener("click", function () {
-      form.hidden = true;
-      toggle.hidden = false;
-      message.hidden = true;
-    });
-
-    form.addEventListener("submit", function (evt) {
-      evt.preventDefault();
-
-      if (!isConfigured(cfg.url, cfg.key)) {
-        showMessage(message, "info", "Online reservations aren't set up yet.");
-        return;
-      }
-
-      var name = (form.elements.name.value || "").trim();
-      var email = (form.elements.email.value || "").trim();
-      var seats = parseInt(form.elements.seats.value, 10);
-      var notes = (form.elements.notes.value || "").trim();
-
-      if (!name) {
-        showMessage(message, "error", "Please enter your name.");
-        return;
-      }
-      if (!Number.isInteger(seats) || seats < 1) {
-        showMessage(message, "error", "Please enter how many seats you'd like (at least one).");
-        return;
-      }
-
+    function send(name, seats) {
       submit.disabled = true;
-      var originalLabel = submit.textContent;
       submit.textContent = "Sending…";
       message.hidden = true;
 
@@ -256,12 +218,12 @@
         method: "POST",
         headers: Object.assign({ "Content-Type": "application/json" }, restHeaders(cfg.key)),
         body: JSON.stringify({
-          action: mode === "waitlist" ? "waitlist" : "reserve",
+          action: mode,
           event_id: slug,
           name: name,
-          email: email,
+          email: form.elements.email.value.trim(),
           seats: seats,
-          notes: notes,
+          notes: form.elements.notes.value.trim(),
         }),
       })
         .then(function (res) {
@@ -271,6 +233,10 @@
         })
         .then(function (result) {
           if (result && result.ok) {
+            booked = true;
+            form.hidden = true;
+            toggle.hidden = true;
+            form.reset();
             if (mode === "waitlist") {
               showMessage(
                 message,
@@ -292,51 +258,75 @@
                   ". See you there!"
               );
             }
-            form.hidden = true;
-            form.reset();
-            // Refresh the live count and button after a successful write.
-            loadAvailability(availabilityEl, applyState);
+            // The form that had focus is gone; hand focus to the confirmation.
+            message.focus();
+            loadAvailability(seatsEl, applyState);
           } else {
             var reason = result && result.reason ? result.reason : "database_error";
-            // If seats ran out mid-flow, re-read availability so the widget
-            // offers the waiting list next.
+            // If seats ran out mid-flow, re-read availability so the open form
+            // switches to the waiting list.
             if (reason === "not_enough_seats") {
-              loadAvailability(availabilityEl, applyState);
+              loadAvailability(seatsEl, applyState);
             }
             showMessage(message, "error", reasonText(reason, result));
-            toggle.hidden = false;
           }
         })
         .catch(function () {
           showMessage(message, "error", "Couldn't reach the reservation service. Please try again.");
-          toggle.hidden = false;
         })
         .finally(function () {
           submit.disabled = false;
-          submit.textContent = originalLabel;
+          submit.textContent = submitLabel();
         });
+    }
+
+    loadAvailability(seatsEl, applyState);
+
+    toggle.addEventListener("click", function () {
+      form.hidden = false;
+      toggle.hidden = true;
+      message.hidden = true;
+      nameInput.focus();
     });
 
-    // Keep the widget's own status flag in mind for closed events.
-    if (status === "closed") {
-      toggle.hidden = true;
-    }
+    cancel.addEventListener("click", function () {
+      form.hidden = true;
+      toggle.hidden = false;
+      message.hidden = true;
+      flagName(false);
+      toggle.focus();
+    });
+
+    nameInput.addEventListener("input", function () {
+      if (nameInput.value.trim()) flagName(false);
+    });
+
+    form.addEventListener("submit", function (evt) {
+      evt.preventDefault();
+      var name = nameInput.value.trim();
+      var seats = parseInt(seatsInput.value, 10);
+      var max = parseInt(seatsInput.max, 10) || MAX_SEATS_PER_REQUEST;
+
+      if (!name) {
+        flagName(true);
+        nameInput.focus();
+      } else if (!Number.isInteger(seats) || seats < 1 || seats > max) {
+        showMessage(message, "error", "Choose between 1 and " + max + (max === 1 ? " seat." : " seats."));
+        seatsInput.focus();
+      } else {
+        send(name, seats);
+      }
+    });
   }
 
   /* ── Boot ───────────────────────────────────────────────────────────────── */
 
   function init() {
-    // Standalone availability badges (event index cards).
-    var badges = document.querySelectorAll("[data-inkworth-availability]");
-    badges.forEach(function (el) {
-      // Skip badges that live inside a widget; the widget loads those itself.
-      if (el.closest("[data-inkworth-widget]")) return;
-      loadAvailability(el);
+    // Standalone availability (event list, home page). Widgets load their own.
+    document.querySelectorAll("[data-inkworth-availability]").forEach(function (el) {
+      if (!el.closest("[data-inkworth-widget]")) loadAvailability(el);
     });
-
-    // Full reservation widgets (event detail pages).
-    var widgets = document.querySelectorAll("[data-inkworth-widget]");
-    widgets.forEach(initWidget);
+    document.querySelectorAll("[data-inkworth-widget]").forEach(initWidget);
   }
 
   if (document.readyState === "loading") {

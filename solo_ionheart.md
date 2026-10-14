@@ -1,6 +1,7 @@
 ---
 layout: page
 title: ION Heart
+label: "Part 03 · Solo journal"
 permalink: /solo_ionheart/
 description: "A solo journaling blog for ION Heart by Parable Games: a Pilot, a Mech, and the Astral Union, one Story Circuit at a time."
 ---
@@ -16,12 +17,14 @@ Each entry is one or more Story Circuits played out by hand and then edited for 
 <ul class="post-list">
   {% for post in entries %}
   <li>
-    <span class="post-meta">{{ post.date | date: "%B %-d, %Y" }}</span>
+    <time class="post-meta" datetime="{{ post.date | date: '%F' }}">{{ post.date | date: "%B %-d, %Y" }}</time>
     <h2><a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h2>
-    {% if post.excerpt %}{{ post.excerpt | strip_html | truncatewords: 40 }}{% endif %}
+    {% if post.excerpt %}<p>{{ post.excerpt | strip_html | truncatewords: 40 }}</p>{% endif %}
   </li>
   {% endfor %}
 </ul>
 {% else %}
 <p>No entries yet. The first one is coming.</p>
 {% endif %}
+
+<p class="feed-link"><a href="{{ '/feed.xml' | relative_url }}">Follow new entries by RSS</a></p>
